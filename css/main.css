@@ -1,0 +1,17 @@
+body, input, button {
+	font-size: 20px;
+}
+
+label {
+	display: block;
+}
+
+label span {
+	display: block;
+}
+
+@media (max-device-width: 480px) {
+	pre {
+		font-size: 14px;
+	}
+}

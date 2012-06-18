@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<title>Alarm Clock</title>
+	<link rel="stylesheet" href="css/reset.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+
+<label>
+	<span>Alarm</span>
+	<input id="alarm">
+</label>
+
+<div style="margin:0 0 10px;">
+	<button id="set">Set</button>
+	<button id="stop">Stop</button>
+</div>
+
+<pre id="status"></pre>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
+<script src="socket.io/socket.io.js"></script>
+<script src="js/date.format.js"></script>
+<script>
+
+var socket = io.connect(/*'http://10.0.0.1:1337'*/);
+
+function log(status) {
+	$('#status').prepend('[' + (new Date()).format('d mmm HH:MM') + '] ' + status + '\n');
+}
+
+socket.on('init', function (data) {
+	log('Connected');
+	
+	if (data.time) {
+		$('#alarm').val(data.time);
+	}
+});
+
+$('#set').click(function () {
+	socket.emit('set', { time: $('#alarm').val().split(':') }, function () {
+		log('Alarm set');
+	});
+});
+
+$('#stop').click(function () {
+	socket.emit('stop', function () {
+		log('Alarm stopped');
+	});
+});
+
+</script>
+</body>
+</html>
