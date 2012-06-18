@@ -3,7 +3,8 @@ var util = require('util'),
 	expressServer = express.createServer(),
 	socketServer = require('socket.io').listen(expressServer),
 	alarm = new require('./lib/alarm').Alarm(),
-	player = new require('./lib/player').Player();
+	player = new require('./lib/player').Player(),
+	nextAlarm = alarm.getNext();
 
 require('./lib/date.format');
 
@@ -35,23 +36,33 @@ socketServer.set('transports', [                     // enable all transports (o
 ]);
 
 socketServer.sockets.on('connection', function (socket) {
-	var next = alarm.getNext();
+	function verify_awake() {
+		
+	}
 	
-	socket.emit('init', { time: next ? next.format('HH:MM') : null });
+	socket.emit('init', { time: nextAlarm ? nextAlarm.format('HH:MM') : null });
 	
 	socket.on('set', function (data) {
-		log('Set alarm: ' + data.time[0] + ':' + data.time[1]);
-		
 		alarm.setTime(data.time[0], data.time[1], function () {
 			//console.log('NUUUUUUUUUUUUU!!!!!!!!!!!!!');
-			log('Alarm triggered')
+			log('Triggered');
+			socketServer.sockets.emit('triggered');
 			player.play('sound/alarm.wav', { repeat: true });
 		});
+		
+		nextAlarm = alarm.getNext();
+		log('Set to ' + nextAlarm.format('HH:MM'));
+		socketServer.sockets.emit('set', { next: nextAlarm });
 	});
 	
 	socket.on('stop', function (data) {
-		log('Stop alarm');
-		player.stop();
+		if (player.playing()) {
+			log('Stopped');
+			socketServer.sockets.emit('stop');
+			player.stop();
+			verify_awake();
+			
+		}
 	});
 	
 	/*socket.emit('news', { hello: 'world' });

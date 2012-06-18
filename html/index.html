@@ -42,6 +42,19 @@ socket.on('init', function (data) {
 	}
 });
 
+socket.on('set', function (data) {
+	$('#alarm').val(new Date(data.next).format('HH:MM'));
+	log('Set to ' + $('#alarm').val());
+});
+
+socket.on('triggered', function () {
+	log('Triggered');
+});
+
+socket.on('stop', function () {
+	log('Stopped');
+});
+
 $('#set').click(function () {
 	socket.emit('set', { time: $('#alarm').val().split(':') }, function () {
 		log('Alarm set');
