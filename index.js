@@ -4,7 +4,8 @@ var util = require('util'),
 	socketServer = require('socket.io').listen(expressServer),
 	alarm = new require('./lib/alarm').Alarm(),
 	player = new require('./lib/player').Player(),
-	nextAlarm = alarm.getNext();
+	nextAlarm = alarm.getNext(),
+	verifyAwakeTimer;
 
 require('./lib/date.format');
 
@@ -35,19 +36,38 @@ socketServer.set('transports', [                     // enable all transports (o
 	'jsonp-polling'
 ]);
 
-socketServer.sockets.on('connection', function (socket) {
-	function verify_awake() {
+function soundAlarm() {
+	player.play('sound/alarm.wav', { repeat: true });
+}
+
+function verifyAwake() {
+	var canReset = false;
+	clearTimeout(verifyAwakeTimer);
+	verifyAwakeTimer = setTimeout(function () {
+		socketServer.sockets.emit('verifyAwake');
+		socketServer.sockets.on('awake', function (data) {
+			console.log('AWAKE!');
+		});
 		
-	}
-	
-	socket.emit('init', { time: nextAlarm ? nextAlarm.format('HH:MM') : null });
+		canReset = true;
+		clearTimeout(verifyAwakeTimer);
+		verifyAwakeTimer = setTimeout(function () {
+			soundAlarm();
+		}, 60000);
+	}, 60000);
+}
+
+socketServer.sockets.on('connection', function (socket) {
+	socket.emit('init', {
+		time: nextAlarm ? nextAlarm.format('HH:MM') : null,
+		triggered: player.playing()
+	});
 	
 	socket.on('set', function (data) {
 		alarm.setTime(data.time[0], data.time[1], function () {
-			//console.log('NUUUUUUUUUUUUU!!!!!!!!!!!!!');
 			log('Triggered');
 			socketServer.sockets.emit('triggered');
-			player.play('sound/alarm.wav', { repeat: true });
+			soundAlarm();
 		});
 		
 		nextAlarm = alarm.getNext();
@@ -60,7 +80,7 @@ socketServer.sockets.on('connection', function (socket) {
 			log('Stopped');
 			socketServer.sockets.emit('stop');
 			player.stop();
-			verify_awake();
+			//verifyAwake();
 			
 		}
 	});

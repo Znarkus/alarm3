@@ -18,10 +18,11 @@
 
 <div style="margin:0 0 10px;">
 	<button id="set">Set</button>
-	<button id="stop">Stop</button>
+	<button id="stop" style="display:none;">Stop</button>
+	<button id="awake" style="display:none;">I'm awake!</button>
 </div>
 
-<pre id="status"></pre>
+<pre id="status" class="loading">Loading...</pre>
 
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
 <script src="socket.io/socket.io.js"></script>
@@ -35,10 +36,18 @@ function log(status) {
 }
 
 socket.on('init', function (data) {
+	if ($('#status').hasClass('loading')) {
+		$('#status').removeClass('loading').html('');
+	}
+	
 	log('Connected');
 	
 	if (data.time) {
 		$('#alarm').val(data.time);
+	}
+	
+	if (data.triggered) {
+		$('#stop').show();
 	}
 });
 
@@ -49,16 +58,24 @@ socket.on('set', function (data) {
 
 socket.on('triggered', function () {
 	log('Triggered');
+	$('#stop').show();
 });
 
 socket.on('stop', function () {
 	log('Stopped');
+	$('#stop').hide();
+});
+
+socket.on('verifyAwake', function () {
+	$('#awake').show();
+});
+
+$('#awake').click(function () {
+	socket.emit('awake');
 });
 
 $('#set').click(function () {
-	socket.emit('set', { time: $('#alarm').val().split(':') }, function () {
-		log('Alarm set');
-	});
+	socket.emit('set', { time: $('#alarm').val().split(':') });
 });
 
 $('#stop').click(function () {
