@@ -38,9 +38,8 @@ function log(status) {
 socket.on('init', function (data) {
 	if ($('#status').hasClass('loading')) {
 		$('#status').removeClass('loading').html('');
+		log('Connected');
 	}
-	
-	log('Connected');
 	
 	if (data.time) {
 		$('#alarm').val(data.time);
@@ -49,20 +48,37 @@ socket.on('init', function (data) {
 	if (data.triggered) {
 		$('#stop').show();
 	}
+	
+	if (data.canVerifyAwake) {
+		('#awake').show();
+	}
+});
+
+/*socket.on('disconnect', function () {
+	log('Disconnected');
+});*/
+
+socket.on('connect_failed', function () {
+	log("Couldn't connect");
+});
+
+socket.on('log', function (msg) {
+	log(msg);
 });
 
 socket.on('set', function (data) {
 	$('#alarm').val(new Date(data.next).format('HH:MM'));
-	log('Set to ' + $('#alarm').val());
+	//log('Set to ' + $('#alarm').val());
 });
 
 socket.on('triggered', function () {
-	log('Triggered');
+	//log('Triggered');
 	$('#stop').show();
+	$('#awake').hide();
 });
 
 socket.on('stop', function () {
-	log('Stopped');
+	//log('Stopped');
 	$('#stop').hide();
 });
 
@@ -72,16 +88,15 @@ socket.on('verifyAwake', function () {
 
 $('#awake').click(function () {
 	socket.emit('awake');
+	$(this).hide();
 });
 
 $('#set').click(function () {
-	socket.emit('set', { time: $('#alarm').val().split(':') });
+	socket.emit('set', { time: $('#alarm').val() });
 });
 
 $('#stop').click(function () {
-	socket.emit('stop', function () {
-		log('Alarm stopped');
-	});
+	socket.emit('stop');
 });
 
 </script>
