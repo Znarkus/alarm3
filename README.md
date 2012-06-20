@@ -1,4 +1,3 @@
-
 # Alarm 3
 
 Install this app, hook up some speakers and use the computer as an alarm clock. Controlled via a web interface.
@@ -14,7 +13,7 @@ Alarm sound is taken from http://soundjax.com/alarm-1.html.
 
 ## Install
 
-    npm install.
+    npm install .
 
 
 ## Usage
