@@ -8,11 +8,14 @@ var util = require('util'),
 	alarm = new require('./lib/alarm').Alarm(),
 	player = new require('./lib/player').Player(),
 	nextAlarm = alarm.getNext(),
+	logHistory = [],
 	verifyAwakeTimer, canVerifyAwake;
 
 function log(text) {
-	util.puts('[' + (new Date()).format() + '] ' + text);
 	socketServer.sockets.emit('log', text);
+	
+	util.puts('[' + (new Date()).format() + '] ' + text);
+	logHistory.push([text, new Date().getTime()]);
 }
 
 function soundAlarm() {
@@ -85,7 +88,8 @@ socketServer.sockets.on('connection', function (socket) {
 	socket.emit('init', {
 		time: nextAlarm ? nextAlarm.format('HH:MM') : null,
 		triggered: player.playing(),
-		canVerifyAwake: canVerifyAwake
+		canVerifyAwake: canVerifyAwake,
+		logHistory: logHistory
 	});
 	
 	socket.on('set', function (data) {

@@ -10,7 +10,7 @@ Alarm sound is taken from http://soundjax.com/alarm-1.html.
 
 - Built using web sockets. It's fast and propagate events and changes to all clients.
 - Verify awake. Press stop and it will prompt if you're awake after 1 minute.
-- Detailed log.
+- Detailed log. Also fetches log history for new clients.
 
 ## Install
 

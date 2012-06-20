@@ -31,13 +31,19 @@
 
 var socket = io.connect(/*'http://10.0.0.1:1337'*/);
 
-function log(status) {
-	$('#status').prepend('[' + (new Date()).format('d mmm HH:MM') + '] ' + status + '\n');
+function log(status, date) {
+	date = date || new Date();
+	$('#status').prepend('[' + date.format('d mmm HH:MM') + '] ' + status + '\n');
 }
 
 socket.on('init', function (data) {
 	if ($('#status').hasClass('loading')) {
 		$('#status').removeClass('loading').html('');
+		
+		$.each(data.logHistory, function () {
+			log(this[0], new Date(this[1]));
+		});
+		
 		log('Connected');
 	}
 	
