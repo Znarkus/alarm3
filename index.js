@@ -8,7 +8,8 @@ var util = require('util'),
 	alarm = new require('./lib/alarm').Alarm(),
 	player = new require('./lib/player').Player(),
 	nextAlarm = alarm.getNext(),
-	logHistory = []
+	logHistory = [],
+	lastAlarmStr
 	/*config = {
 		plugins: ['verify']
 	},
@@ -52,7 +53,7 @@ function verifiedAwake() {
 function parseTime(string) {
 	var time = string.split(':');
 	
-	if (time.length) {
+	if (time.length == 1) {
 		time[1] = 0;
 	}
 	
@@ -83,6 +84,7 @@ socketServer.set('transports', [                     // enable all transports (o
 ]);
 
 alarm.setCallback(function () {
+	nextAlarm = null;
 	log('Triggered');
 	socketServer.sockets.emit('triggered');
 	soundAlarm();
@@ -90,7 +92,8 @@ alarm.setCallback(function () {
 
 socketServer.sockets.on('connection', function (socket) {
 	socket.emit('init', {
-		time: nextAlarm ? nextAlarm.format('HH:MM') : null,
+		lastAlarmStr: lastAlarmStr,
+		alarmSet: !!nextAlarm,
 		triggered: player.playing(),
 		//canVerifyAwake: canVerifyAwake,
 		logHistory: logHistory
@@ -99,16 +102,21 @@ socketServer.sockets.on('connection', function (socket) {
 	socket.on('set', function (data) {
 		alarm.setTime.apply(alarm, parseTime(data.time));
 		nextAlarm = alarm.getNext();
-		log('Set to ' + nextAlarm.format('HH:MM'));
-		socketServer.sockets.emit('set', { next: nextAlarm });
+		lastAlarmStr = nextAlarm.format('HH:MM');
+		log('Set to ' + lastAlarmStr);
+		socketServer.sockets.emit('set', { string: lastAlarmStr });
 	});
 	
 	socket.on('stop', function (data) {
+		log('Stopped');
+		socketServer.sockets.emit('stop');
+		
 		if (player.playing()) {
-			log('Stopped');
-			socketServer.sockets.emit('stop');
 			player.stop();
 			//verifyAwake();
+		} else {
+			alarm.cancel();
+			nextAlarm = null;
 		}
 	});
 	

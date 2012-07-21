@@ -16,6 +16,8 @@
 	<input id="alarm">
 </label>
 
+<div id="alarm_set">Alarm <span></span></div>
+
 <div style="margin:0 0 10px;">
 	<button id="set">Set</button>
 	<button id="stop" style="display:none;">Stop</button>
@@ -37,6 +39,13 @@ function log(status, date) {
 	$('#status').prepend('[' + date.format('d mmm HH:MM') + '] ' + status + '\n');
 }
 
+function alarm_set(time) {
+	$('#alarm').val(time).parent().hide();
+	$('#alarm_set span').text(time).parent().show();
+	$('#set').hide();
+	$('#stop').show();
+}
+
 socket.on('init', function (data) {
 	if ($('#status').hasClass('loading')) {
 		$('#status').removeClass('loading').html('');
@@ -48,8 +57,12 @@ socket.on('init', function (data) {
 		log('Connected');
 	}
 	
-	if (data.time) {
-		$('#alarm').val(data.time);
+	if (data.lastAlarmStr) {
+		$('#alarm').val(data.lastAlarmStr);
+	}
+	
+	if (data.alarmSet) {
+		alarm_set(data.lastAlarmStr);
 	}
 	
 	if (data.triggered) {
@@ -76,19 +89,22 @@ socket.on('log', function (msg) {
 });
 
 socket.on('set', function (data) {
-	$('#alarm').val(new Date(data.next).format('HH:MM'));
+	alarm_set(data.string);
 	//log('Set to ' + $('#alarm').val());
 });
 
 socket.on('triggered', function () {
 	//log('Triggered');
-	$('#stop').show();
+	//$('#stop').show();
 	//$('#awake').hide();
 });
 
 socket.on('stop', function () {
 	//log('Stopped');
 	$('#stop').hide();
+	$('#set').show();
+	$('#alarm').parent().show();
+	$('#alarm_set').hide();
 });
 
 /*socket.on('verifyAwake', function () {

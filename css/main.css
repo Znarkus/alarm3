@@ -10,6 +10,11 @@ label span {
 	display: block;
 }
 
+#alarm_set { 
+	display: none;
+	font: 30px/1em monospace;
+}
+
 @media (max-device-width: 480px) {
 	pre {
 		font-size: 14px;
