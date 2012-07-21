@@ -8,8 +8,12 @@ var util = require('util'),
 	alarm = new require('./lib/alarm').Alarm(),
 	player = new require('./lib/player').Player(),
 	nextAlarm = alarm.getNext(),
-	logHistory = [],
-	verifyAwakeTimer, canVerifyAwake;
+	logHistory = []
+	/*config = {
+		plugins: ['verify']
+	},
+	plugins = {},*/
+	/*verifyAwakeTimer, canVerifyAwake*/;
 
 function log(text) {
 	socketServer.sockets.emit('log', text);
@@ -22,11 +26,11 @@ function soundAlarm() {
 	player.play('sound/alarm.wav', { repeat: true });
 }
 
-function verifyAwake() {
+/*function verifyAwake() {
 	canVerifyAwake = false;
 	clearTimeout(verifyAwakeTimer);
 	log('Initiating awake verification');
-	
+	socketServer.sockets.emit('canVerifyAwakeIn', 60000);
 	verifyAwakeTimer = setTimeout(function () {
 		socketServer.sockets.emit('verifyAwake');
 		canVerifyAwake = true;
@@ -43,7 +47,7 @@ function verifiedAwake() {
 		clearTimeout(verifyAwakeTimer);
 		log('Awake verified');
 	}
-}
+}*/
 
 function parseTime(string) {
 	var time = string.split(':');
@@ -88,7 +92,7 @@ socketServer.sockets.on('connection', function (socket) {
 	socket.emit('init', {
 		time: nextAlarm ? nextAlarm.format('HH:MM') : null,
 		triggered: player.playing(),
-		canVerifyAwake: canVerifyAwake,
+		//canVerifyAwake: canVerifyAwake,
 		logHistory: logHistory
 	});
 	
@@ -104,13 +108,13 @@ socketServer.sockets.on('connection', function (socket) {
 			log('Stopped');
 			socketServer.sockets.emit('stop');
 			player.stop();
-			verifyAwake();
+			//verifyAwake();
 		}
 	});
 	
-	socket.on('awake', function (data) {
+	/*socket.on('awake', function (data) {
 		verifiedAwake();
-	});
+	});*/
 	
 	/*socket.emit('news', { hello: 'world' });
 	socket.on('my other event', function (data) {

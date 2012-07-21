@@ -19,7 +19,8 @@
 <div style="margin:0 0 10px;">
 	<button id="set">Set</button>
 	<button id="stop" style="display:none;">Stop</button>
-	<button id="awake" style="display:none;">I'm awake!</button>
+	<!--<button id="awake" style="display:none;">I'm awake!</button>
+	<span id="awake_ticker"></span>-->
 </div>
 
 <pre id="status" class="loading">Loading...</pre>
@@ -55,9 +56,11 @@ socket.on('init', function (data) {
 		$('#stop').show();
 	}
 	
-	if (data.canVerifyAwake) {
-		('#awake').show();
-	}
+	/*if (data.canVerifyAwake) {
+		$('#awake').show().removeAttr('disabled');
+	} else {
+		$('#awake').hide();
+	}*/
 });
 
 /*socket.on('disconnect', function () {
@@ -80,7 +83,7 @@ socket.on('set', function (data) {
 socket.on('triggered', function () {
 	//log('Triggered');
 	$('#stop').show();
-	$('#awake').hide();
+	//$('#awake').hide();
 });
 
 socket.on('stop', function () {
@@ -88,14 +91,27 @@ socket.on('stop', function () {
 	$('#stop').hide();
 });
 
-socket.on('verifyAwake', function () {
-	$('#awake').show();
+/*socket.on('verifyAwake', function () {
+	$('#awake').show().removeAttr('disabled');
+});
+
+socket.on('canVerifyAwakeIn', function (ms) {
+	$('#awake').show().attr('disabled', 'disabled');
+	var end = new Date().getTime() + ms;
+	var interval = setInterval(function () {
+		if (end > new Date().getTime()) {
+			$('#awake_ticker').text(Math.floor((end - new Date().getTime()) / 1000) + ' seconds left');
+		} else {
+			$('#awake_ticker').text('');
+			clearInterval(interval);
+		}
+	}, 1000);
 });
 
 $('#awake').click(function () {
 	socket.emit('awake');
 	$(this).hide();
-});
+});*/
 
 $('#set').click(function () {
 	socket.emit('set', { time: $('#alarm').val() });
