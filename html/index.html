@@ -13,13 +13,15 @@
 
 <label>
 	<span>Alarm</span>
-	<input id="alarm">
+	<input type="time" id="alarm">
 </label>
 
 <div id="alarm_set">Alarm <span></span></div>
 
 <div style="margin:0 0 10px;">
 	<button id="set">Set</button>
+	<button id="test">Test</button>
+	<button id="powernap">Power nap</button>
 	<button id="stop" style="display:none;">Stop</button>
 	<!--<button id="awake" style="display:none;">I'm awake!</button>
 	<span id="awake_ticker"></span>-->
@@ -30,6 +32,7 @@
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="js/date.format.js"></script>
+<script src="js/fastclick/lib/fastclick.js"></script>
 <script>
 
 var socket = io.connect(/*'http://10.0.0.1:1337'*/);
@@ -39,10 +42,12 @@ function log(status, date) {
 	$('#status').prepend('[' + date.format('d mmm HH:MM') + '] ' + status + '\n');
 }
 
-function alarm_set(time) {
+function alarm_was_set(time) {
 	$('#alarm').val(time).parent().hide();
 	$('#alarm_set span').text(time).parent().show();
 	$('#set').hide();
+	$('#powernap').hide();
+	$('#test').hide();
 	$('#stop').show();
 }
 
@@ -62,7 +67,7 @@ socket.on('init', function (data) {
 	}
 	
 	if (data.alarmSet) {
-		alarm_set(data.lastAlarmStr);
+		alarm_was_set(data.lastAlarmStr);
 	}
 	
 	if (data.triggered) {
@@ -89,8 +94,15 @@ socket.on('log', function (msg) {
 });
 
 socket.on('set', function (data) {
-	alarm_set(data.string);
+	alarm_was_set(data.string);
 	//log('Set to ' + $('#alarm').val());
+});
+
+socket.on('test', function (data) {
+	$('#stop').show();
+	$('#set').hide();
+	$('#powernap').hide();
+	$('#test').hide();
 });
 
 socket.on('triggered', function () {
@@ -103,6 +115,8 @@ socket.on('stop', function () {
 	//log('Stopped');
 	$('#stop').hide();
 	$('#set').show();
+	$('#powernap').show();
+	$('#test').show();
 	$('#alarm').parent().show();
 	$('#alarm_set').hide();
 });
@@ -133,9 +147,22 @@ $('#set').click(function () {
 	socket.emit('set', { time: $('#alarm').val() });
 });
 
+$('#test').click(function () {
+	socket.emit('test');
+});
+
 $('#stop').click(function () {
 	socket.emit('stop');
 });
+
+$('#powernap').click(function () {
+    var date = new Date(new Date().getTime() + 60 * 20 * 1000);	// 20 minutes
+    socket.emit('set', { time: date.format('HH:MM') });
+});
+
+window.addEventListener('load', function() {
+    new FastClick(document.body);
+}, false);
 
 </script>
 </body>

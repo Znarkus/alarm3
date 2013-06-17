@@ -2,6 +2,7 @@
 require('./lib/date.format');
 
 var util = require('util'),
+	fs = require('fs'),
 	express = require('express'),
 	expressServer = express.createServer(),
 	socketServer = require('socket.io').listen(expressServer),
@@ -9,7 +10,8 @@ var util = require('util'),
 	player = new require('./lib/player').Player(),
 	nextAlarm = alarm.getNext(),
 	logHistory = [],
-	lastAlarmStr
+	lastAlarmStr,
+	config = { playlist: 'playlist.txt', playlistShuffle: true, alarmFile: 'sound/galaxy_s4_alarm_no1.mp3' }
 	/*config = {
 		plugins: ['verify']
 	},
@@ -23,8 +25,64 @@ function log(text) {
 	logHistory.push([text, new Date().getTime()]);
 }
 
+function shuffle(array) {
+    var tmp, current, top = array.length;
+
+    if (top) while(--top) {
+        current = Math.floor(Math.random() * (top + 1));
+        tmp = array[current];
+        array[current] = array[top];
+        array[top] = tmp;
+    }
+
+    return array;
+}
+
+function playlist(callback) {
+	fs.exists(config.playlist, function (exists) {
+		if (exists) {
+			fs.readFile(config.playlist, 'utf-8', function (err, data) {
+				data = data.split('\n');
+				
+				if (config.playlistShuffle) {
+					data = shuffle(data);
+				}
+				
+				callback(data);
+				/*.some(function (filename) {
+					if (fs.existsSync(filename)) {
+						player.play(filename);
+						return true;
+					}
+				});*/
+				//player()
+			});
+		} else {
+			callback([]);
+		}
+	});
+}
+
+function playCallback(file) {
+	log('Playing ' + file);
+}
+
 function soundAlarm() {
-	player.play('sound/alarm.wav', { repeat: true });
+	player.play(config.alarmFile, { repeat: true });
+	/*playlist(function (list) {
+		var newList = [];
+		
+		if (list.length > 0) {
+			list.forEach(function (f) {
+				newList.push([f, { playCallback: playCallback }]);
+				newList.push([config.alarmFile, { repeat: true, timeLimit: 30, playCallback: playCallback }]);
+			});
+		} else {
+			newList.push([config.alarmFile, { repeat: true, timeLimit: 30, playCallback: playCallback }]);
+		}
+		
+		player.playlist(newList);
+	});*/
 }
 
 /*function verifyAwake() {
@@ -107,6 +165,12 @@ socketServer.sockets.on('connection', function (socket) {
 		socketServer.sockets.emit('set', { string: lastAlarmStr });
 	});
 	
+	socket.on('test', function (data) {
+		soundAlarm();
+		log('Testing');
+		socketServer.sockets.emit('test');
+	});
+	
 	socket.on('stop', function (data) {
 		log('Stopped');
 		socketServer.sockets.emit('stop');
@@ -129,3 +193,5 @@ socketServer.sockets.on('connection', function (socket) {
 		console.log(data);
 	});*/
 });
+
+//soundAlarm();
