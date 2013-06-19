@@ -103,6 +103,7 @@ socket.on('test', function (data) {
 	$('#set').hide();
 	$('#powernap').hide();
 	$('#test').hide();
+	$('#alarm').parent().hide();
 });
 
 socket.on('triggered', function () {
@@ -156,8 +157,13 @@ $('#stop').click(function () {
 });
 
 $('#powernap').click(function () {
-    var date = new Date(new Date().getTime() + 60 * 20 * 1000);	// 20 minutes
-    socket.emit('set', { time: date.format('HH:MM') });
+    var date, minutes;
+    minutes = prompt('Power nap length? (minutes)', 20);
+    
+    if (minutes) {
+	    date = new Date(new Date().getTime() + 60 * parseInt(minutes, 10) * 1000);
+	    socket.emit('set', { time: date.format('HH:MM') });
+	}
 });
 
 window.addEventListener('load', function() {
