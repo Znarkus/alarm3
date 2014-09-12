@@ -11,7 +11,11 @@ var util = require('util'),
 	nextAlarm = alarm.getNext(),
 	logHistory = [],
 	lastAlarmStr,
-	config = { playlist: 'playlist.txt', playlistShuffle: true, alarmFile: 'sound/galaxy_s4_alarm_no1.mp3' }
+	config = { 
+		playlist: 'playlist.txt', 
+		playlistShuffle: true, 
+		alarmFile: 'sound/alarm.mp3'
+	}
 	/*config = {
 		plugins: ['verify']
 	},
@@ -122,6 +126,7 @@ expressServer.configure(function () {
 	expressServer.use(express.static(__dirname + '/html'));
 	expressServer.use('/css', express.static(__dirname + '/css'));
 	expressServer.use('/js', express.static(__dirname + '/lib'));
+	expressServer.use('/jslib/fastclick', express.static(__dirname + '/node_modules/fastclick/lib'));
 });
 
 expressServer.listen(1337, function () {

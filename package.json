@@ -1,10 +1,15 @@
 {
 	"name": "alarm-clock",
-	"version": "0.0.1",
+	"version": "0.2",
 	"author": "Markus Hedlund <znarkus@gmail.com>",
 	"dependencies": {
-		"socket.io": "0.9.x",
-		"express": "2.5.x"
+		"express": "2.5.x",
+		"fastclick": "^1.0.3",
+		"socket.io": "0.9.x"
 	},
-	"engine": "node = 0.6.x"
+	"engine": "node = 0.6.x",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:Znarkus/alarm3.git"
+	}
 }
