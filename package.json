@@ -1,6 +1,6 @@
 {
 	"name": "alarm-clock",
-	"version": "0.2",
+	"version": "0.2.0",
 	"author": "Markus Hedlund <znarkus@gmail.com>",
 	"dependencies": {
 		"express": "2.5.x",
