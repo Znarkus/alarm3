@@ -127,6 +127,9 @@ expressServer.configure(function () {
 	expressServer.use('/css', express.static(__dirname + '/css'));
 	expressServer.use('/js', express.static(__dirname + '/lib'));
 	expressServer.use('/jslib/fastclick', express.static(__dirname + '/node_modules/fastclick/lib'));
+	expressServer.use('/jslib/moment', express.static(__dirname + '/node_modules/moment/min'));
+	expressServer.use('/jslib/jquery', express.static(__dirname + '/bower_components/jquery'));
+	expressServer.use('/jslib/string', express.static(__dirname + '/bower_components/stringjs/lib'));
 });
 
 expressServer.listen(1337, function () {
@@ -159,7 +162,8 @@ socketServer.sockets.on('connection', function (socket) {
 		alarmSet: !!nextAlarm,
 		triggered: player.playing(),
 		//canVerifyAwake: canVerifyAwake,
-		logHistory: logHistory
+		logHistory: logHistory,
+		now: new Date().getTime()
 	});
 	
 	socket.on('set', function (data) {
@@ -167,7 +171,11 @@ socketServer.sockets.on('connection', function (socket) {
 		nextAlarm = alarm.getNext();
 		lastAlarmStr = nextAlarm.format('HH:MM');
 		log('Set to ' + lastAlarmStr);
-		socketServer.sockets.emit('set', { string: lastAlarmStr });
+		socketServer.sockets.emit('set', {
+			string: lastAlarmStr,
+			now: new Date().getTime(),
+			nextAlarm: nextAlarm.getTime()
+		});
 	});
 	
 	socket.on('test', function (data) {

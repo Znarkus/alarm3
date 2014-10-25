@@ -1,0 +1,21 @@
+{
+  "name": "alarm3",
+  "main": "index.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/Znarkus/alarm3",
+  "authors": [
+    "Markus Hedlund <znarkus@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.7.2",
+    "stringjs": "~2.2.0"
+  }
+}

@@ -27,15 +27,32 @@
 	<span id="awake_ticker"></span>-->
 </div>
 
+<div id="flash"></div>
 <pre id="status" class="loading">Loading...</pre>
 
-<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
+<script src="jslib/jquery/jquery.min.js"></script>
 <script src="socket.io/socket.io.js"></script>
 <script src="js/date.format.js"></script>
 <script src="jslib/fastclick/fastclick.js"></script>
+<script src="jslib/moment/moment.min.js"></script>
+<script src="jslib/string/string.min.js"></script>
 <script>
 
 var socket = io.connect(/*'http://10.0.0.1:1337'*/);
+
+(function () {
+	var timer,
+			$flash = $('#flash');
+
+	window.flashMessage = function (msg) {
+		$flash.text(msg).css({opacity:1});
+
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			$flash.animate({opacity:0});
+		}, 5000);
+	};
+}());
 
 function log(status, date) {
 	date = date || new Date();
@@ -73,6 +90,8 @@ socket.on('init', function (data) {
 	if (data.triggered) {
 		$('#stop').show();
 	}
+
+	flashMessage('Server time is ' + moment(data.now).format('HH:mm'));
 	
 	/*if (data.canVerifyAwake) {
 		$('#awake').show().removeAttr('disabled');
@@ -94,7 +113,11 @@ socket.on('log', function (msg) {
 });
 
 socket.on('set', function (data) {
+	var diff = moment(data.nextAlarm).diff(data.now);
 	alarm_was_set(data.string);
+//	flashMessage(S().capitalize() + ' left');
+	flashMessage(Math.floor(diff / 3600000) + ':' + pad(Math.floor(diff / 600000), 2) + ' left');
+//	flashMessage(S(moment(data.nextAlarm).from(data.now, true)).capitalize() + ' left');
 	//log('Set to ' + $('#alarm').val());
 });
 
@@ -105,6 +128,8 @@ socket.on('test', function (data) {
 	$('#test').hide();
 	$('#alarm').parent().hide();
 });
+
+
 
 socket.on('triggered', function () {
 	//log('Triggered');
@@ -169,6 +194,12 @@ $('#powernap').click(function () {
 window.addEventListener('load', function() {
     new FastClick(document.body);
 }, false);
+
+function pad(n, width, z) {
+	z = z || '0';
+	n = n + '';
+	return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
 
 </script>
 </body>
