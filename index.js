@@ -3,6 +3,7 @@ require('./lib/date.format');
 
 var util = require('util'),
 	fs = require('fs'),
+	http = require('http'),
 	express = require('express'),
 	expressServer = express.createServer(),
 	socketServer = require('socket.io').listen(expressServer),
@@ -14,7 +15,13 @@ var util = require('util'),
 	config = { 
 		playlist: 'playlist.txt', 
 		playlistShuffle: true, 
-		alarmFile: 'sound/alarm.mp3'
+		alarmFile: 'sound/alarm.mp3',
+		callbackUrls: {
+			trigger: [
+				//{ host: '10.0.0.1', port: 3000, path: '/morning' }
+				//'http://10.0.0.1:3000/morning'
+			]
+		}
 	}
 	/*config = {
 		plugins: ['verify']
@@ -154,6 +161,12 @@ alarm.setCallback(function () {
 	log('Triggered');
 	socketServer.sockets.emit('triggered');
 	soundAlarm();
+
+	if (config && config.callbackUrls && config.callbackUrls.trigger) {
+		config.callbackUrls.trigger.forEach(function (url) {
+			http.request(url).end();
+		});
+	}
 });
 
 socketServer.sockets.on('connection', function (socket) {

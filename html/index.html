@@ -113,10 +113,12 @@ socket.on('log', function (msg) {
 });
 
 socket.on('set', function (data) {
-	var diff = moment(data.nextAlarm).diff(data.now);
+	var diff = moment(data.nextAlarm).diff(data.now),
+			diffSec = diff / 1000;
 	alarm_was_set(data.string);
 //	flashMessage(S().capitalize() + ' left');
-	flashMessage(Math.floor(diff / 3600000) + ':' + pad(Math.floor(diff / 600000), 2) + ' left');
+
+	flashMessage(Math.floor(diffSec / 3600) + ':' + pad(Math.floor(diffSec % 3600 / 60), 2) + ' left');
 //	flashMessage(S(moment(data.nextAlarm).from(data.now, true)).capitalize() + ' left');
 	//log('Set to ' + $('#alarm').val());
 });
