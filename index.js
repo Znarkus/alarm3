@@ -4,6 +4,7 @@ require('./lib/date.format');
 var util = require('util'),
 	fs = require('fs'),
 	http = require('http'),
+	Path = require('path'),
 	express = require('express'),
 	expressServer = express.createServer(),
 	socketServer = require('socket.io').listen(expressServer),
@@ -13,12 +14,13 @@ var util = require('util'),
 	logHistory = [],
 	lastAlarmStr,
 	config = { 
-		playlist: 'playlist.txt', 
+		playlist: Path.resolve(__dirname, 'playlist.txt'),
 		playlistShuffle: true, 
-		alarmFile: 'sound/alarm.mp3',
+		alarmFile: Path.resolve(__dirname, 'sound/alarm.mp3'),
 		callbackUrls: {
 			trigger: [
 				//{ host: '10.0.0.1', port: 3000, path: '/morning' }
+				{ hostname: '10.0.0.1', port: 3000, path: '/lamp-setting/full', method: 'POST' }
 				//'http://10.0.0.1:3000/morning'
 			]
 		}
@@ -32,7 +34,7 @@ var util = require('util'),
 function log(text) {
 	socketServer.sockets.emit('log', text);
 	
-	util.puts('[' + (new Date()).format() + '] ' + text);
+	console.log('[' + (new Date()).format() + '] ' + text);
 	logHistory.push([text, new Date().getTime()]);
 }
 
@@ -141,7 +143,7 @@ expressServer.configure(function () {
 
 expressServer.listen(1337, function () {
 	var addr = expressServer.address();
-	util.puts('Server running on http://' + addr.address + ':' + addr.port);
+	console.log('Server running on http://' + addr.address + ':' + addr.port);
 });
 
 socketServer.enable('browser client minification');  // send minified client
