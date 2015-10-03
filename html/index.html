@@ -141,6 +141,7 @@ socket.on('triggered', function () {
 
 socket.on('stop', function () {
 	//log('Stopped');
+	flashMessage('Stopped');
 	$('#stop').hide();
 	$('#set').show();
 	$('#powernap').show();
@@ -172,6 +173,7 @@ $('#awake').click(function () {
 });*/
 
 $('#set').click(function () {
+	flashMessage('Setting..');
 	socket.emit('set', { time: $('#alarm').val() });
 });
 
@@ -180,6 +182,7 @@ $('#test').click(function () {
 });
 
 $('#stop').click(function () {
+	flashMessage('Stopping..');
 	socket.emit('stop');
 });
 
