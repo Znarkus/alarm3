@@ -13,14 +13,14 @@ var util = require('util'),
 	nextAlarm = alarm.getNext(),
 	logHistory = [],
 	lastAlarmStr,
-	config = { 
+	config = {
 		playlist: Path.resolve(__dirname, 'playlist.txt'),
-		playlistShuffle: true, 
+		playlistShuffle: true,
 		alarmFile: Path.resolve(__dirname, 'sound/alarm.mp3'),
 		callbackUrls: {
 			trigger: [
 				//{ host: '10.0.0.1', port: 3000, path: '/morning' }
-				{ hostname: '10.0.0.1', port: 3000, path: '/lamp-setting/full', method: 'POST' }
+				{ hostname: '10.0.0.1', port: 8888, path: '/dim/75', method: 'POST' }
 				//'http://10.0.0.1:3000/morning'
 			]
 		}
@@ -33,7 +33,7 @@ var util = require('util'),
 
 function log(text) {
 	socketServer.sockets.emit('log', text);
-	
+
 	console.log('[' + (new Date()).format() + '] ' + text);
 	logHistory.push([text, new Date().getTime()]);
 }
@@ -56,11 +56,11 @@ function playlist(callback) {
 		if (exists) {
 			fs.readFile(config.playlist, 'utf-8', function (err, data) {
 				data = data.split('\n');
-				
+
 				if (config.playlistShuffle) {
 					data = shuffle(data);
 				}
-				
+
 				callback(data);
 				/*.some(function (filename) {
 					if (fs.existsSync(filename)) {
@@ -84,7 +84,7 @@ function soundAlarm() {
 	player.play(config.alarmFile, { repeat: true });
 	/*playlist(function (list) {
 		var newList = [];
-		
+
 		if (list.length > 0) {
 			list.forEach(function (f) {
 				newList.push([f, { playCallback: playCallback }]);
@@ -93,7 +93,7 @@ function soundAlarm() {
 		} else {
 			newList.push([config.alarmFile, { repeat: true, timeLimit: 30, playCallback: playCallback }]);
 		}
-		
+
 		player.playlist(newList);
 	});*/
 }
@@ -123,11 +123,11 @@ function verifiedAwake() {
 
 function parseTime(string) {
 	var time = string.split(':');
-	
+
 	if (time.length == 1) {
 		time[1] = 0;
 	}
-	
+
 	return time;
 }
 
@@ -180,7 +180,7 @@ socketServer.sockets.on('connection', function (socket) {
 		logHistory: logHistory,
 		now: new Date().getTime()
 	});
-	
+
 	socket.on('set', function (data) {
 		alarm.setTime.apply(alarm, parseTime(data.time));
 		nextAlarm = alarm.getNext();
@@ -192,17 +192,17 @@ socketServer.sockets.on('connection', function (socket) {
 			nextAlarm: nextAlarm.getTime()
 		});
 	});
-	
+
 	socket.on('test', function (data) {
 		soundAlarm();
 		log('Testing');
 		socketServer.sockets.emit('test');
 	});
-	
+
 	socket.on('stop', function (data) {
 		log('Stopped');
 		socketServer.sockets.emit('stop');
-		
+
 		if (player.playing()) {
 			player.stop();
 			//verifyAwake();
@@ -211,11 +211,11 @@ socketServer.sockets.on('connection', function (socket) {
 			nextAlarm = null;
 		}
 	});
-	
+
 	/*socket.on('awake', function (data) {
 		verifiedAwake();
 	});*/
-	
+
 	/*socket.emit('news', { hello: 'world' });
 	socket.on('my other event', function (data) {
 		console.log(data);
