@@ -3,16 +3,19 @@
   "version": "0.2.0",
   "author": "Markus Hedlund <znarkus@gmail.com>",
   "dependencies": {
+    "bower": "^1.7.9",
     "debug": "^2.2.0",
-    "express": "2.5.x",
-    "fastclick": "^1.0.3",
-    "jquery": "^1.7.3",
-    "moment": "^2.8.3",
-    "socket.io": "0.9.x"
+    "express": "^4.13.4",
+    "fastclick": "^1.0.6",
+    "moment": "^2.13.0",
+    "socket.io": "^1.4.5"
   },
   "engine": "node = 0.6.x",
   "repository": {
     "type": "git",
     "url": "git@github.com:Znarkus/alarm3.git"
+  },
+  "scripts": {
+    "bower-install": "bower install"
   }
 }

@@ -6,8 +6,11 @@ var util = require('util'),
 	http = require('http'),
 	Path = require('path'),
 	express = require('express'),
-	expressServer = express.createServer(),
-	socketServer = require('socket.io').listen(expressServer),
+	app = express(),
+	server = require('http').createServer(app),
+	io = require('socket.io').listen(server),
+	// expressServer = express(),
+	// io = require('socket.io').listen(expressServer.Http),
 	alarm = new require('./lib/alarm').Alarm(),
 	player = new require('./lib/player').Player(),
 	nextAlarm = alarm.getNext(),
@@ -32,7 +35,7 @@ var util = require('util'),
 	/*verifyAwakeTimer, canVerifyAwake*/;
 
 function log(text) {
-	socketServer.sockets.emit('log', text);
+	io.sockets.emit('log', text);
 
 	console.log('[' + (new Date()).format() + '] ' + text);
 	logHistory.push([text, new Date().getTime()]);
@@ -102,9 +105,9 @@ function soundAlarm() {
 	canVerifyAwake = false;
 	clearTimeout(verifyAwakeTimer);
 	log('Initiating awake verification');
-	socketServer.sockets.emit('canVerifyAwakeIn', 60000);
+	io.sockets.emit('canVerifyAwakeIn', 60000);
 	verifyAwakeTimer = setTimeout(function () {
-		socketServer.sockets.emit('verifyAwake');
+		io.sockets.emit('verifyAwake');
 		canVerifyAwake = true;
 		clearTimeout(verifyAwakeTimer);
 		verifyAwakeTimer = setTimeout(function () {
@@ -131,37 +134,37 @@ function parseTime(string) {
 	return time;
 }
 
-expressServer.configure(function () {
-	expressServer.use(express.static(__dirname + '/html'));
-	expressServer.use('/css', express.static(__dirname + '/css'));
-	expressServer.use('/js', express.static(__dirname + '/lib'));
-	expressServer.use('/jslib/fastclick', express.static(__dirname + '/node_modules/fastclick/lib'));
-	expressServer.use('/jslib/moment', express.static(__dirname + '/node_modules/moment/min'));
-	expressServer.use('/jslib/jquery', express.static(__dirname + '/bower_components/jquery'));
-	expressServer.use('/jslib/string', express.static(__dirname + '/bower_components/stringjs/lib'));
+// expressServer.configure(function () {
+	app.use(express.static(__dirname + '/html'));
+	app.use('/css', express.static(__dirname + '/css'));
+	app.use('/js', express.static(__dirname + '/lib'));
+	app.use('/jslib/fastclick', express.static(__dirname + '/node_modules/fastclick/lib'));
+	app.use('/jslib/moment', express.static(__dirname + '/node_modules/moment/min'));
+	app.use('/jslib/jquery', express.static(__dirname + '/bower_components/jquery'));
+	app.use('/jslib/string', express.static(__dirname + '/bower_components/stringjs/lib'));
+// });
+
+// server.listen(app.get('port'));
+server.listen(1337, function () {
+	console.log('Server running on port 1337');
 });
 
-expressServer.listen(1337, function () {
-	var addr = expressServer.address();
-	console.log('Server running on http://' + addr.address + ':' + addr.port);
-});
-
-socketServer.enable('browser client minification');  // send minified client
-socketServer.enable('browser client etag');          // apply etag caching logic based on version number
-socketServer.enable('browser client gzip');          // gzip the file
-socketServer.set('log level', 1);                    // reduce logging
-socketServer.set('transports', [                     // enable all transports (optional if you want flashsocket)
-	'websocket',
-	'flashsocket',
-	'htmlfile',
-	'xhr-polling',
-	'jsonp-polling'
-]);
+// io.enable('browser client minification');  // send minified client
+// io.enable('browser client etag');          // apply etag caching logic based on version number
+// io.enable('browser client gzip');          // gzip the file
+// io.set('log level', 1);                    // reduce logging
+// io.set('transports', [                     // enable all transports (optional if you want flashsocket)
+// 	'websocket',
+// 	'flashsocket',
+// 	'htmlfile',
+// 	'xhr-polling',
+// 	'jsonp-polling'
+// ]);
 
 alarm.setCallback(function () {
 	nextAlarm = null;
 	log('Triggered');
-	socketServer.sockets.emit('triggered');
+	io.sockets.emit('triggered');
 	soundAlarm();
 
 	if (config && config.callbackUrls && config.callbackUrls.trigger) {
@@ -171,7 +174,7 @@ alarm.setCallback(function () {
 	}
 });
 
-socketServer.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function (socket) {
 	socket.emit('init', {
 		lastAlarmStr: lastAlarmStr,
 		alarmSet: !!nextAlarm,
@@ -186,7 +189,7 @@ socketServer.sockets.on('connection', function (socket) {
 		nextAlarm = alarm.getNext();
 		lastAlarmStr = nextAlarm.format('HH:MM');
 		log('Set to ' + lastAlarmStr);
-		socketServer.sockets.emit('set', {
+		io.sockets.emit('set', {
 			string: lastAlarmStr,
 			now: new Date().getTime(),
 			nextAlarm: nextAlarm.getTime()
@@ -196,12 +199,12 @@ socketServer.sockets.on('connection', function (socket) {
 	socket.on('test', function (data) {
 		soundAlarm();
 		log('Testing');
-		socketServer.sockets.emit('test');
+		io.sockets.emit('test');
 	});
 
 	socket.on('stop', function (data) {
 		log('Stopped');
-		socketServer.sockets.emit('stop');
+		io.sockets.emit('stop');
 
 		if (player.playing()) {
 			player.stop();
