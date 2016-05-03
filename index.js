@@ -169,7 +169,11 @@ alarm.setCallback(function () {
 
 	if (config && config.callbackUrls && config.callbackUrls.trigger) {
 		config.callbackUrls.trigger.forEach(function (url) {
-			http.request(url).end();
+			try {
+				http.request(url).end();
+			} catch (e) {
+				console.error(e);
+			}
 		});
 	}
 });
