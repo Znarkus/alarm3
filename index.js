@@ -37,7 +37,8 @@ var util = require('util'),
 function log(text) {
 	io.sockets.emit('log', text);
 
-	console.log('[' + (new Date()).format() + '] ' + text);
+	console.log(text);
+	// console.log('[' + (new Date()).format() + '] ' + text);
 	logHistory.push([text, new Date().getTime()]);
 }
 
@@ -169,11 +170,12 @@ alarm.setCallback(function () {
 
 	if (config && config.callbackUrls && config.callbackUrls.trigger) {
 		config.callbackUrls.trigger.forEach(function (url) {
-			try {
-				http.request(url).end();
-			} catch (e) {
-				console.error(e);
-			}
+			http
+				.request(url)
+				.on('error', err => {
+					console.error('Callback URL error:', err);
+				})
+				.end();
 		});
 	}
 });
