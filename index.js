@@ -23,7 +23,7 @@ var util = require('util'),
 		callbackUrls: {
 			trigger: [
 				//{ host: '10.0.0.1', port: 3000, path: '/morning' }
-				{ hostname: '10.0.0.1', port: 8888, path: '/dim/75', method: 'POST' }
+				{ hostname: '10.0.0.4', port: 8888, path: '/dim/75', method: 'POST' }
 				//'http://10.0.0.1:3000/morning'
 			]
 		}
@@ -37,8 +37,7 @@ var util = require('util'),
 function log(text) {
 	io.sockets.emit('log', text);
 
-	console.log(text);
-	// console.log('[' + (new Date()).format() + '] ' + text);
+	console.log('[' + (new Date()).format() + '] ' + text);
 	logHistory.push([text, new Date().getTime()]);
 }
 
