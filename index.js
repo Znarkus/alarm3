@@ -144,6 +144,9 @@ function parseTime(string) {
 	app.use('/jslib/string', express.static(__dirname + '/bower_components/stringjs/lib'));
 // });
 
+// Every 20 min to keep awake
+setInterval(() => 1, 1000 * 60 * 20);
+
 // server.listen(app.get('port'));
 server.listen(1337, function () {
 	console.log('Server running on port 1337');
